@@ -172,13 +172,19 @@ a job;
 - Ability to choose GPU-enabled nodes;
 
 The simulation then outputs data containing:
+
 - The number of jobs processed in each queue throughout the week;
+
 - The actual number of nodes-hours consumed by the users;
+
 - The utilization ratio (i.e. number of nodes-hours consumed by the users /
 number of nodes-hours available);
+
 - The average queuing time in each type of queue;
+
 - The average turnaround time ratio (i.e. time of queuing the job to run completion
 / actual job runtime);
+
 - The monetary balance of the operating centre;
 
 The system has three active actors: the researchers and students who submit jobs for
@@ -349,7 +355,7 @@ as the one we are building.
 ### System Design using Class Diagram
 
 Each class in the diagram below serves a specific purpose:
-S
+
 - The Data class holds all the constants needed in every other class to run the
 simulation.
 

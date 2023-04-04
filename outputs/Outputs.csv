@@ -1,0 +1,6 @@
+Queue;Short;Medium;Large;Huge;GPU
+Number of jobs processed;79;97;6;3;15
+Average wait time (s);30300.8;36883.7;34843;703214;51762.3
+
+Number of node-hours consumed by user jobs;Utilization ratio;Resulting price paid by the users;Average turnaround time ratio;Economic balance of the centre
+0.109203;0;1302 £;45333.1;-34273.8 £

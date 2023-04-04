@@ -1,0 +1,9 @@
+﻿  Simulation.cpp
+C:\Users\x.bilbao\Documents\GitHub\Supercomputer-simulation\Simulation.cpp(110,16): warning C4018: '<': signed/unsigned mismatch
+C:\Users\x.bilbao\Documents\GitHub\Supercomputer-simulation\Simulation.cpp(122,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\x.bilbao\Documents\GitHub\Supercomputer-simulation\Simulation.cpp(174,18): warning C4018: '<': signed/unsigned mismatch
+C:\Users\x.bilbao\Documents\GitHub\Supercomputer-simulation\Simulation.cpp(220,11): warning C4018: '<': signed/unsigned mismatch
+C:\Users\x.bilbao\Documents\GitHub\Supercomputer-simulation\Simulation.cpp(265,11): warning C4018: '<': signed/unsigned mismatch
+C:\Users\x.bilbao\Documents\GitHub\Supercomputer-simulation\Simulation.cpp(276,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\x.bilbao\Documents\GitHub\Supercomputer-simulation\Simulation.cpp(305,25): warning C4018: '<': signed/unsigned mismatch
+  SupercomputerSimut.vcxproj -> C:\Users\x.bilbao\Documents\GitHub\Supercomputer-simulation\Debug\SupercomputerSimut.exe

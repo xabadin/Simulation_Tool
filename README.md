@@ -1,1 +1,1 @@
-# Supercomputer_Simulation
+# Supercomputer-simulation

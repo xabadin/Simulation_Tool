@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+        <meta charset="utf-8"/>
+	    <title>Parameters.cpp</title>
+	    <link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	    <script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+    <body onload="prettyPrint()">
+        <h4></h4>
+        <pre class="prettyprint lang-cpp linenums">
+ï»¿#include "Parameters.h"
+
+//Default contructor - The default input values are defined in the "Data.h" header file.
+
+<span style = "background-color:#fdd">Parameters::Parameters() {
+	this-&gt;numberOfUsers = NUMBER_OF_USERS;</span>
+
+<span style = "background-color:#fdd">	this-&gt;numberOfJobs = NUMBER_OF_JOBS;</span>
+
+<span style = "background-color:#fdd">	this-&gt;numberOfNodes = MIN_NUMBER_OF_NODES;</span>
+
+	//10% of the nodes need to be reserved for the short queue
+<span style = "background-color:#fdd">	this-&gt;numberOfShortNodes = (numberOfNodes - NUMBER_OF_GPU_NODES) / 10;</span>
+
+	//30% of the nodes need to be reserved for the medium queue
+<span style = "background-color:#fdd">	this-&gt;numberOfMediumNodes = (numberOfNodes - NUMBER_OF_GPU_NODES) / 3;</span>
+
+	//50% of the nodes need to be reserved for the short queue
+<span style = "background-color:#fdd">	this-&gt;numberOfLargeNodes = (numberOfNodes - NUMBER_OF_GPU_NODES) / 2;</span>
+
+	//8 GPU nodes
+<span style = "background-color:#fdd">	this-&gt;numberOfGPUNodes = NUMBER_OF_GPU_NODES;</span>
+
+	//All the nodes need to be reserved for the short queue except the GPU nodes
+<span style = "background-color:#fdd">	this-&gt;numberOfHugeNodes = numberOfNodes - NUMBER_OF_GPU_NODES;</span>
+
+<span style = "background-color:#fdd">	this-&gt;traditionalNodeCost = TRADITIONAL_NODE_COST;
+	this-&gt;acceleratedNodeCost = ACCELERATED_NODE_COST;</span>
+
+<span style = "background-color:#fdd">	this-&gt;operatingCost = OPERATING_COST;</span>
+
+<span style = "background-color:#fdd">	this-&gt;studentBudget = STUDENT_BUDGET;</span>
+
+<span style = "background-color:#fdd">	this-&gt;studentMaxNodes = STUDENT_MAX_NODES;</span>
+
+<span style = "background-color:#fdd">	this-&gt;researcherBudget = RESEARCHER_BUDGET;</span>
+
+<span style = "background-color:#fdd">	this-&gt;researcherMaxNodes = RESEARCHER_MAX_NODES;
+}</span>
+
+Parameters::Parameters(unsigned int numberOfUsers, unsigned int numberOfJobs, unsigned int numberOfNodes, double traditionalNodeCost,
+<span style = "background-color:#dfd">	double acceleratedNodeCost, double studentBudget, unsigned int studentMaxNodes, double researcherBudget, unsigned int researcherMaxNodes) {</span>
+
+<span style = "background-color:#dfd">	if (numberOfUsers != 0) {</span>
+<span style = "background-color:#fdd">		this-&gt;numberOfUsers = numberOfUsers;
+	}</span>
+	else {
+<span style = "background-color:#dfd">		this-&gt;numberOfUsers = NUMBER_OF_USERS;</span>
+	}
+
+<span style = "background-color:#dfd">	if (numberOfJobs != 0) {</span>
+<span style = "background-color:#fdd">		this-&gt;numberOfJobs = numberOfJobs;
+	}</span>
+	else {
+<span style = "background-color:#dfd">		this-&gt;numberOfJobs = NUMBER_OF_JOBS;</span>
+	}
+
+<span style = "background-color:#dfd">	if (numberOfNodes != 0) {</span>
+<span style = "background-color:#fdd">		this-&gt;numberOfNodes = numberOfNodes;
+	}</span>
+	else {
+<span style = "background-color:#dfd">		this-&gt;numberOfNodes = MIN_NUMBER_OF_NODES;</span>
+	}
+
+<span style = "background-color:#dfd">	if (traditionalNodeCost != 0) {</span>
+<span style = "background-color:#fdd">		this-&gt;traditionalNodeCost = traditionalNodeCost / 3600;
+	}</span>
+	else {
+<span style = "background-color:#dfd">		this-&gt;traditionalNodeCost = TRADITIONAL_NODE_COST;</span>
+	}
+
+<span style = "background-color:#dfd">	if (acceleratedNodeCost != 0) {</span>
+<span style = "background-color:#fdd">		this-&gt;acceleratedNodeCost = acceleratedNodeCost / 3600;
+	}</span>
+	else {
+<span style = "background-color:#dfd">		this-&gt;acceleratedNodeCost = ACCELERATED_NODE_COST;</span>
+	}
+
+<span style = "background-color:#dfd">	if (studentBudget != 0) {</span>
+<span style = "background-color:#fdd">		this-&gt;studentBudget = studentBudget;
+	}</span>
+	else {
+<span style = "background-color:#dfd">		this-&gt;studentBudget = STUDENT_BUDGET;</span>
+	}
+
+<span style = "background-color:#dfd">	if (studentMaxNodes != 0) {</span>
+<span style = "background-color:#fdd">		this-&gt;studentMaxNodes = studentMaxNodes;
+	}</span>
+	else {
+<span style = "background-color:#dfd">		this-&gt;studentMaxNodes = STUDENT_MAX_NODES;</span>
+	}
+
+<span style = "background-color:#dfd">	if (researcherBudget != 0) {</span>
+<span style = "background-color:#fdd">		this-&gt;researcherBudget = researcherBudget;
+	}</span>
+	else {
+<span style = "background-color:#dfd">		this-&gt;researcherBudget = RESEARCHER_BUDGET;</span>
+	}
+
+<span style = "background-color:#dfd">	if (researcherMaxNodes != 0) {</span>
+<span style = "background-color:#fdd">		this-&gt;researcherMaxNodes = researcherMaxNodes;
+	}</span>
+	else {
+<span style = "background-color:#dfd">		this-&gt;researcherMaxNodes = RESEARCHER_MAX_NODES;</span>
+	}
+
+	//10% of the nodes need to be reserved for the short queue
+<span style = "background-color:#dfd">	this-&gt;numberOfShortNodes = (this-&gt;numberOfNodes - NUMBER_OF_GPU_NODES) / 10;</span>
+
+	//30% of the nodes need to be reserved for the medium queue
+<span style = "background-color:#dfd">	this-&gt;numberOfMediumNodes = (this-&gt;numberOfNodes - NUMBER_OF_GPU_NODES) / 3;</span>
+
+	//50% of the nodes need to be reserved for the short queue
+<span style = "background-color:#dfd">	this-&gt;numberOfLargeNodes = (this-&gt;numberOfNodes - NUMBER_OF_GPU_NODES) / 2;</span>
+
+	//8 GPU nodes
+<span style = "background-color:#dfd">	this-&gt;numberOfGPUNodes = NUMBER_OF_GPU_NODES;</span>
+
+	//All the nodes need to be reserved for the short queue except the GPU nodes
+<span style = "background-color:#dfd">	this-&gt;numberOfHugeNodes = this-&gt;numberOfNodes - NUMBER_OF_GPU_NODES;</span>
+
+<span style = "background-color:#dfd">	this-&gt;operatingCost = OPERATING_COST;
+}</span>
+
+//GETTERS
+// return number of users
+<span style = "background-color:#dfd">unsigned int Parameters::getNumberOfUsers() {
+	return this-&gt;numberOfUsers;
+}</span>
+
+// Returns the number of jobs when this value is not generated randomly
+<span style = "background-color:#dfd">unsigned int Parameters::getNumberOfJobs() {
+	return this-&gt;numberOfJobs;
+}</span>
+
+// Returns the total number of system nodes
+<span style = "background-color:#dfd">unsigned int Parameters::getNumberOfNodes() {
+	return this-&gt;numberOfNodes;
+}</span>
+
+<span style = "background-color:#dfd">unsigned int Parameters::getNumberOfShortNodes() {
+	return this-&gt;numberOfShortNodes;
+}</span>
+
+<span style = "background-color:#dfd">unsigned int Parameters::getNumberOfMediumNodes() {
+	return this-&gt;numberOfMediumNodes;
+}</span>
+
+<span style = "background-color:#dfd">unsigned int Parameters::getNumberOfLargeNodes() {
+	return this-&gt;numberOfLargeNodes;
+}</span>
+
+<span style = "background-color:#dfd">unsigned int Parameters::getNumberOfGPUNodes() {
+	return this-&gt;numberOfGPUNodes;
+}</span>
+
+<span style = "background-color:#dfd">unsigned int Parameters::getNumberOfHugeNodes() {
+	return this-&gt;numberOfHugeNodes;
+}</span>
+
+// Returns the usage price of the system per node second
+<span style = "background-color:#fdd">double Parameters::getTraditionalNodeCost() {
+	return this-&gt;traditionalNodeCost;
+}</span>
+
+// Returns the usage price of the system per node second
+<span style = "background-color:#fdd">double Parameters::getAcceleratedNodeCost() {
+	return this-&gt;acceleratedNodeCost;
+}</span>
+
+// Returns the operational cost of the system per second
+<span style = "background-color:#fdd">double Parameters::getOperatingCost() {
+	return this-&gt;operatingCost;
+}</span>
+
+// Returns the student budget
+<span style = "background-color:#dfd">double Parameters::getStudentBudget() {
+	return this-&gt;studentBudget;
+}</span>
+
+// Returns the maximum of nodes that a student can request simultaneously
+<span style = "background-color:#dfd">unsigned int Parameters::getStudentMaxNodes() {
+	return this-&gt;studentMaxNodes;
+}</span>
+
+// Returns the researcher budget 
+<span style = "background-color:#dfd">double Parameters::getResearcherBudget() {
+	return this-&gt;researcherBudget;
+}</span>
+
+// Returns the maximum of nodes that a researcher can request simultaneously
+<span style = "background-color:#dfd">unsigned int Parameters::getResearcherMaxNodes() {
+	return this-&gt;researcherMaxNodes;
+}</span>
+
+//SETTERS
+// Defines the number of users
+<span style = "background-color:#fdd">void Parameters::setNumberOfUsers(unsigned int numberOfUsers) {
+	this-&gt;numberOfUsers = numberOfUsers;
+}</span>
+
+// Defines the number of jobs of a new simulation
+<span style = "background-color:#fdd">void Parameters::setNumberOfJobs(unsigned int numberOfJobs) {
+	this-&gt;numberOfJobs = numberOfJobs;
+}</span>
+
+// Defines the total number of system nodes
+<span style = "background-color:#fdd">void Parameters::setNumberOfNodes(unsigned int numberOfNodes) {
+	this-&gt;numberOfNodes = numberOfNodes;
+}</span>
+
+// Defines the usage price of the system's traditional nodes per second
+<span style = "background-color:#fdd">void Parameters::setTraditionalNodeCost(double traditionalNodeCost) {
+	this-&gt;traditionalNodeCost = traditionalNodeCost;
+}</span>
+
+// Defines the usage price of the system's accelerated nodes per second
+<span style = "background-color:#fdd">void Parameters::setAcceleratedNodeCost(double acceleratedNodeCost) {
+	this-&gt;acceleratedNodeCost = acceleratedNodeCost;
+}</span>
+
+// Defines the operational cost of the system per core second
+<span style = "background-color:#fdd">void Parameters::setOperatingCost(double operatingCost) {
+	this-&gt;operatingCost = operatingCost;
+}</span>
+
+// Defines the student budget 
+<span style = "background-color:#fdd">void Parameters::setStudentBudget(double budget) {
+	this-&gt;studentBudget = budget;
+}</span>
+
+// Defines the researcher budget 
+<span style = "background-color:#fdd">void Parameters::setResearcherBudget(double budget) {
+	this-&gt;researcherBudget = budget;
+}</span></pre>
+        <hr />
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th align="center">
+                        <small>Generated by</small>
+                        <a href="https://github.com/OpenCppCoverage/OpenCppCoverage/releases">
+                            <strong>OpenCppCoverage (Version: 0.9.9.0)</strong>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </body>
+</html>

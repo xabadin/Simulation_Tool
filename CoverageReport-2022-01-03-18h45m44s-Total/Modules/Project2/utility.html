@@ -1,0 +1,807 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+        <meta charset="utf-8"/>
+	    <title>utility</title>
+	    <link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	    <script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+    <body onload="prettyPrint()">
+        <h4></h4>
+        <pre class="prettyprint lang-cpp linenums">
+// utility standard header (core)
+
+// Copyright (c) Microsoft Corporation.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+#pragma once
+#ifndef _UTILITY_
+#define _UTILITY_
+#include &lt;yvals_core.h&gt;
+#if _STL_COMPILER_PREPROCESSOR
+#include &lt;type_traits&gt;
+#include &lt;xstddef&gt;
+
+#ifdef __cpp_lib_concepts
+#include &lt;concepts&gt;
+#endif // __cpp_lib_concepts
+
+#if _HAS_CXX20
+#include &lt;compare&gt;
+#endif // _HAS_CXX20
+
+#pragma pack(push, _CRT_PACKING)
+#pragma warning(push, _STL_WARNING_LEVEL)
+#pragma warning(disable : _STL_DISABLED_WARNINGS)
+_STL_DISABLE_CLANG_WARNINGS
+#pragma push_macro("new")
+#undef new
+
+_STD_BEGIN
+// FUNCTION TEMPLATE max
+template &lt;class _Ty, class _Pr&gt;
+_NODISCARD constexpr const _Ty&amp;(max)(const _Ty&amp; _Left, const _Ty&amp; _Right, _Pr _Pred) noexcept(
+    noexcept(_Pred(_Left, _Right))) /* strengthened */ {
+    // return larger of _Left and _Right
+    return _Pred(_Left, _Right) ? _Right : _Left;
+}
+
+#pragma warning(push)
+#pragma warning(disable : 28285) // (syntax error in SAL annotation, occurs when _Ty is not an integral type)
+template &lt;class _Ty&gt;
+_NODISCARD _Post_equal_to_(_Left &lt; _Right ? _Right : _Left) constexpr const _Ty&amp;(max)(
+<span style = "background-color:#fdd">    const _Ty&amp; _Left, const _Ty&amp; _Right) noexcept(noexcept(_Left &lt; _Right)) /* strengthened */ {</span>
+    // return larger of _Left and _Right
+<span style = "background-color:#fdd">    return _Left &lt; _Right ? _Right : _Left;
+}</span>
+#pragma warning(pop)
+
+template &lt;class _Ty, class _Pr&gt;
+_NODISCARD constexpr _Ty(max)(initializer_list&lt;_Ty&gt;, _Pr); // implemented in &lt;algorithm&gt;
+
+template &lt;class _Ty&gt;
+_NODISCARD constexpr _Ty(max)(initializer_list&lt;_Ty&gt;); // implemented in &lt;algorithm&gt;
+
+// FUNCTION TEMPLATE min
+template &lt;class _Ty, class _Pr&gt;
+_NODISCARD constexpr const _Ty&amp;(min)(const _Ty&amp; _Left, const _Ty&amp; _Right, _Pr _Pred) noexcept(
+    noexcept(_Pred(_Right, _Left))) /* strengthened */ {
+    // return smaller of _Left and _Right
+    return _Pred(_Right, _Left) ? _Right : _Left;
+}
+
+#pragma warning(push)
+#pragma warning(disable : 28285) // (syntax error in SAL annotation, occurs when _Ty is not an integral type)
+template &lt;class _Ty&gt;
+_NODISCARD _Post_equal_to_(_Right &lt; _Left ? _Right : _Left) constexpr const _Ty&amp;(min)(
+<span style = "background-color:#dfd">    const _Ty&amp; _Left, const _Ty&amp; _Right) noexcept(noexcept(_Right &lt; _Left)) /* strengthened */ {</span>
+    // return smaller of _Left and _Right
+<span style = "background-color:#dfd">    return _Right &lt; _Left ? _Right : _Left;
+}</span>
+#pragma warning(pop)
+
+template &lt;class _Ty, class _Pr&gt;
+_NODISCARD constexpr _Ty(min)(initializer_list&lt;_Ty&gt;, _Pr); // implemented in &lt;algorithm&gt;
+
+template &lt;class _Ty&gt;
+_NODISCARD constexpr _Ty(min)(initializer_list&lt;_Ty&gt;); // implemented in &lt;algorithm&gt;
+
+// FUNCTION TEMPLATE iter_swap (from &lt;algorithm&gt;)
+template &lt;class _FwdIt1, class _FwdIt2&gt;
+<span style = "background-color:#dfd">_CONSTEXPR20 void iter_swap(_FwdIt1 _Left, _FwdIt2 _Right) { // swap *_Left and *_Right
+    swap(*_Left, *_Right);
+}</span>
+
+// FUNCTION TEMPLATE swap
+template &lt;class _Ty, size_t _Size, enable_if_t&lt;_Is_swappable&lt;_Ty&gt;::value, int&gt; _Enabled&gt;
+_CONSTEXPR20 void swap(_Ty (&amp;_Left)[_Size], _Ty (&amp;_Right)[_Size]) noexcept(_Is_nothrow_swappable&lt;_Ty&gt;::value) {
+    if (&amp;_Left != &amp;_Right) {
+        _Ty* _First1 = _Left;
+        _Ty* _Last1  = _First1 + _Size;
+        _Ty* _First2 = _Right;
+        for (; _First1 != _Last1; ++_First1, ++_First2) {
+            _STD iter_swap(_First1, _First2);
+        }
+    }
+}
+
+#if _HAS_CXX17
+template &lt;class _Ty, enable_if_t&lt;is_move_constructible_v&lt;_Ty&gt; &amp;&amp; is_move_assignable_v&lt;_Ty&gt;, int&gt; _Enabled&gt;
+#else // ^^^ _HAS_CXX17 / !_HAS_CXX17 vvv
+template &lt;class _Ty, int _Enabled&gt;
+#endif // _HAS_CXX17
+_CONSTEXPR20 void swap(_Ty&amp; _Left, _Ty&amp; _Right) noexcept(
+<span style = "background-color:#dfd">    is_nothrow_move_constructible_v&lt;_Ty&gt;&amp;&amp; is_nothrow_move_assignable_v&lt;_Ty&gt;) {
+    _Ty _Tmp = _STD move(_Left);
+    _Left    = _STD move(_Right);
+    _Right   = _STD move(_Tmp);
+}</span>
+
+// FUNCTION TEMPLATE _Swap_adl
+template &lt;class _Ty&gt;
+_CONSTEXPR20 void _Swap_adl(_Ty&amp; _Left, _Ty&amp; _Right) noexcept(_Is_nothrow_swappable&lt;_Ty&gt;::value) {
+    swap(_Left, _Right);
+}
+
+// STRUCT piecewise_construct_t
+struct piecewise_construct_t { // tag type for pair tuple arguments
+    explicit piecewise_construct_t() = default;
+};
+
+_INLINE_VAR constexpr piecewise_construct_t piecewise_construct{};
+
+// STRUCT TEMPLATE pair
+template &lt;class...&gt;
+class tuple;
+
+template &lt;size_t _Index, class... _Types&gt;
+_NODISCARD constexpr auto&amp;&amp; _Tuple_get(tuple&lt;_Types...&gt;&amp;&amp; _Tuple) noexcept;
+
+template &lt;class _Ty1, class _Ty2&gt;
+struct pair { // store a pair of values
+    using first_type  = _Ty1;
+    using second_type = _Ty2;
+
+#if _HAS_CONDITIONAL_EXPLICIT
+    template &lt;class _Uty1 = _Ty1, class _Uty2 = _Ty2,
+        enable_if_t&lt;conjunction_v&lt;is_default_constructible&lt;_Uty1&gt;, is_default_constructible&lt;_Uty2&gt;&gt;, int&gt; = 0&gt;
+    constexpr explicit(
+        !conjunction_v&lt;_Is_implicitly_default_constructible&lt;_Uty1&gt;, _Is_implicitly_default_constructible&lt;_Uty2&gt;&gt;)
+        pair() noexcept(
+            is_nothrow_default_constructible_v&lt;_Uty1&gt;&amp;&amp; is_nothrow_default_constructible_v&lt;_Uty2&gt;) // strengthened
+        : first(), second() {}
+#else // ^^^ _HAS_CONDITIONAL_EXPLICIT ^^^ / vvv !_HAS_CONDITIONAL_EXPLICIT vvv
+    template &lt;class _Uty1 = _Ty1, class _Uty2 = _Ty2,
+        enable_if_t&lt;conjunction_v&lt;is_default_constructible&lt;_Uty1&gt;, is_default_constructible&lt;_Uty2&gt;,
+                        _Is_implicitly_default_constructible&lt;_Uty1&gt;, _Is_implicitly_default_constructible&lt;_Uty2&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr pair() noexcept(
+        is_nothrow_default_constructible_v&lt;_Uty1&gt;&amp;&amp; is_nothrow_default_constructible_v&lt;_Uty2&gt;) // strengthened
+        : first(), second() {}
+
+    template &lt;class _Uty1 = _Ty1, class _Uty2 = _Ty2,
+        enable_if_t&lt;conjunction_v&lt;is_default_constructible&lt;_Uty1&gt;, is_default_constructible&lt;_Uty2&gt;,
+                        negation&lt;conjunction&lt;_Is_implicitly_default_constructible&lt;_Uty1&gt;,
+                            _Is_implicitly_default_constructible&lt;_Uty2&gt;&gt;&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr explicit pair() noexcept(
+        is_nothrow_default_constructible_v&lt;_Uty1&gt;&amp;&amp; is_nothrow_default_constructible_v&lt;_Uty2&gt;) // strengthened
+        : first(), second() {}
+#endif // ^^^ !_HAS_CONDITIONAL_EXPLICIT ^^^
+
+#if _HAS_CONDITIONAL_EXPLICIT
+    template &lt;class _Uty1 = _Ty1, class _Uty2 = _Ty2,
+        enable_if_t&lt;conjunction_v&lt;is_copy_constructible&lt;_Uty1&gt;, is_copy_constructible&lt;_Uty2&gt;&gt;, int&gt; = 0&gt;
+    constexpr explicit(!conjunction_v&lt;is_convertible&lt;const _Uty1&amp;, _Uty1&gt;, is_convertible&lt;const _Uty2&amp;, _Uty2&gt;&gt;)
+        pair(const _Ty1&amp; _Val1, const _Ty2&amp; _Val2) noexcept(
+            is_nothrow_copy_constructible_v&lt;_Uty1&gt;&amp;&amp; is_nothrow_copy_constructible_v&lt;_Uty2&gt;) // strengthened
+        : first(_Val1), second(_Val2) {}
+#else // ^^^ _HAS_CONDITIONAL_EXPLICIT ^^^ / vvv !_HAS_CONDITIONAL_EXPLICIT vvv
+    template &lt;class _Uty1 = _Ty1, class _Uty2 = _Ty2,
+        enable_if_t&lt;conjunction_v&lt;is_copy_constructible&lt;_Uty1&gt;, is_copy_constructible&lt;_Uty2&gt;,
+                        is_convertible&lt;const _Uty1&amp;, _Uty1&gt;, is_convertible&lt;const _Uty2&amp;, _Uty2&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr pair(const _Ty1&amp; _Val1, const _Ty2&amp; _Val2) noexcept(
+        is_nothrow_copy_constructible_v&lt;_Uty1&gt;&amp;&amp; is_nothrow_copy_constructible_v&lt;_Uty2&gt;) // strengthened
+        : first(_Val1), second(_Val2) {}
+
+    template &lt;class _Uty1 = _Ty1, class _Uty2 = _Ty2,
+        enable_if_t&lt;
+            conjunction_v&lt;is_copy_constructible&lt;_Uty1&gt;, is_copy_constructible&lt;_Uty2&gt;,
+                negation&lt;conjunction&lt;is_convertible&lt;const _Uty1&amp;, _Uty1&gt;, is_convertible&lt;const _Uty2&amp;, _Uty2&gt;&gt;&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr explicit pair(const _Ty1&amp; _Val1, const _Ty2&amp; _Val2) noexcept(
+        is_nothrow_copy_constructible_v&lt;_Uty1&gt;&amp;&amp; is_nothrow_copy_constructible_v&lt;_Uty2&gt;) // strengthened
+        : first(_Val1), second(_Val2) {}
+#endif // ^^^ !_HAS_CONDITIONAL_EXPLICIT ^^^
+
+#if _HAS_CONDITIONAL_EXPLICIT
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;is_constructible&lt;_Ty1, _Other1&gt;, is_constructible&lt;_Ty2, _Other2&gt;&gt;, int&gt; = 0&gt;
+    constexpr explicit(!conjunction_v&lt;is_convertible&lt;_Other1, _Ty1&gt;, is_convertible&lt;_Other2, _Ty2&gt;&gt;)
+        pair(_Other1&amp;&amp; _Val1, _Other2&amp;&amp; _Val2) noexcept(
+            is_nothrow_constructible_v&lt;_Ty1, _Other1&gt;&amp;&amp; is_nothrow_constructible_v&lt;_Ty2, _Other2&gt;) // strengthened
+<span style = "background-color:#dfd">        : first(_STD forward&lt;_Other1&gt;(_Val1)), second(_STD forward&lt;_Other2&gt;(_Val2)) {}</span>
+#else // ^^^ _HAS_CONDITIONAL_EXPLICIT ^^^ / vvv !_HAS_CONDITIONAL_EXPLICIT vvv
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;is_constructible&lt;_Ty1, _Other1&gt;, is_constructible&lt;_Ty2, _Other2&gt;,
+                        is_convertible&lt;_Other1, _Ty1&gt;, is_convertible&lt;_Other2, _Ty2&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr pair(_Other1&amp;&amp; _Val1, _Other2&amp;&amp; _Val2) noexcept(
+        is_nothrow_constructible_v&lt;_Ty1, _Other1&gt;&amp;&amp; is_nothrow_constructible_v&lt;_Ty2, _Other2&gt;) // strengthened
+        : first(_STD forward&lt;_Other1&gt;(_Val1)), second(_STD forward&lt;_Other2&gt;(_Val2)) {}
+
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;is_constructible&lt;_Ty1, _Other1&gt;, is_constructible&lt;_Ty2, _Other2&gt;,
+                        negation&lt;conjunction&lt;is_convertible&lt;_Other1, _Ty1&gt;, is_convertible&lt;_Other2, _Ty2&gt;&gt;&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr explicit pair(_Other1&amp;&amp; _Val1, _Other2&amp;&amp; _Val2) noexcept(
+        is_nothrow_constructible_v&lt;_Ty1, _Other1&gt;&amp;&amp; is_nothrow_constructible_v&lt;_Ty2, _Other2&gt;) // strengthened
+        : first(_STD forward&lt;_Other1&gt;(_Val1)), second(_STD forward&lt;_Other2&gt;(_Val2)) {}
+#endif // ^^^ !_HAS_CONDITIONAL_EXPLICIT ^^^
+
+    pair(const pair&amp;) = default;
+    pair(pair&amp;&amp;)      = default;
+
+#if _HAS_CONDITIONAL_EXPLICIT
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;is_constructible&lt;_Ty1, const _Other1&amp;&gt;, is_constructible&lt;_Ty2, const _Other2&amp;&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr explicit(!conjunction_v&lt;is_convertible&lt;const _Other1&amp;, _Ty1&gt;, is_convertible&lt;const _Other2&amp;, _Ty2&gt;&gt;)
+        pair(const pair&lt;_Other1, _Other2&gt;&amp; _Right) noexcept(is_nothrow_constructible_v&lt;_Ty1, const _Other1&amp;&gt;&amp;&amp;
+                is_nothrow_constructible_v&lt;_Ty2, const _Other2&amp;&gt;) // strengthened
+        : first(_Right.first), second(_Right.second) {}
+#else // ^^^ _HAS_CONDITIONAL_EXPLICIT ^^^ / vvv !_HAS_CONDITIONAL_EXPLICIT vvv
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;is_constructible&lt;_Ty1, const _Other1&amp;&gt;, is_constructible&lt;_Ty2, const _Other2&amp;&gt;,
+                        is_convertible&lt;const _Other1&amp;, _Ty1&gt;, is_convertible&lt;const _Other2&amp;, _Ty2&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr pair(const pair&lt;_Other1, _Other2&gt;&amp; _Right) noexcept(is_nothrow_constructible_v&lt;_Ty1, const _Other1&amp;&gt;&amp;&amp;
+            is_nothrow_constructible_v&lt;_Ty2, const _Other2&amp;&gt;) // strengthened
+        : first(_Right.first), second(_Right.second) {}
+
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;
+            conjunction_v&lt;is_constructible&lt;_Ty1, const _Other1&amp;&gt;, is_constructible&lt;_Ty2, const _Other2&amp;&gt;,
+                negation&lt;conjunction&lt;is_convertible&lt;const _Other1&amp;, _Ty1&gt;, is_convertible&lt;const _Other2&amp;, _Ty2&gt;&gt;&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr explicit pair(const pair&lt;_Other1, _Other2&gt;&amp; _Right) noexcept(
+        is_nothrow_constructible_v&lt;_Ty1, const _Other1&amp;&gt;&amp;&amp;
+            is_nothrow_constructible_v&lt;_Ty2, const _Other2&amp;&gt;) // strengthened
+        : first(_Right.first), second(_Right.second) {}
+#endif // ^^^ !_HAS_CONDITIONAL_EXPLICIT ^^^
+
+#if _HAS_CONDITIONAL_EXPLICIT
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;is_constructible&lt;_Ty1, _Other1&gt;, is_constructible&lt;_Ty2, _Other2&gt;&gt;, int&gt; = 0&gt;
+    constexpr explicit(!conjunction_v&lt;is_convertible&lt;_Other1, _Ty1&gt;, is_convertible&lt;_Other2, _Ty2&gt;&gt;)
+        pair(pair&lt;_Other1, _Other2&gt;&amp;&amp; _Right) noexcept(
+            is_nothrow_constructible_v&lt;_Ty1, _Other1&gt;&amp;&amp; is_nothrow_constructible_v&lt;_Ty2, _Other2&gt;) // strengthened
+        : first(_STD forward&lt;_Other1&gt;(_Right.first)), second(_STD forward&lt;_Other2&gt;(_Right.second)) {}
+#else // ^^^ _HAS_CONDITIONAL_EXPLICIT ^^^ / vvv !_HAS_CONDITIONAL_EXPLICIT vvv
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;is_constructible&lt;_Ty1, _Other1&gt;, is_constructible&lt;_Ty2, _Other2&gt;,
+                        is_convertible&lt;_Other1, _Ty1&gt;, is_convertible&lt;_Other2, _Ty2&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr pair(pair&lt;_Other1, _Other2&gt;&amp;&amp; _Right) noexcept(
+        is_nothrow_constructible_v&lt;_Ty1, _Other1&gt;&amp;&amp; is_nothrow_constructible_v&lt;_Ty2, _Other2&gt;) // strengthened
+        : first(_STD forward&lt;_Other1&gt;(_Right.first)), second(_STD forward&lt;_Other2&gt;(_Right.second)) {}
+
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;is_constructible&lt;_Ty1, _Other1&gt;, is_constructible&lt;_Ty2, _Other2&gt;,
+                        negation&lt;conjunction&lt;is_convertible&lt;_Other1, _Ty1&gt;, is_convertible&lt;_Other2, _Ty2&gt;&gt;&gt;&gt;,
+            int&gt; = 0&gt;
+    constexpr explicit pair(pair&lt;_Other1, _Other2&gt;&amp;&amp; _Right) noexcept(
+        is_nothrow_constructible_v&lt;_Ty1, _Other1&gt;&amp;&amp; is_nothrow_constructible_v&lt;_Ty2, _Other2&gt;) // strengthened
+        : first(_STD forward&lt;_Other1&gt;(_Right.first)), second(_STD forward&lt;_Other2&gt;(_Right.second)) {}
+#endif // ^^^ !_HAS_CONDITIONAL_EXPLICIT ^^^
+
+    template &lt;class _Tuple1, class _Tuple2, size_t... _Indexes1, size_t... _Indexes2&gt;
+    constexpr pair(_Tuple1&amp; _Val1, _Tuple2&amp; _Val2, index_sequence&lt;_Indexes1...&gt;, index_sequence&lt;_Indexes2...&gt;)
+        : first(_Tuple_get&lt;_Indexes1&gt;(_STD move(_Val1))...), second(_Tuple_get&lt;_Indexes2&gt;(_STD move(_Val2))...) {}
+
+    template &lt;class... _Types1, class... _Types2&gt;
+    _CONSTEXPR20 pair(piecewise_construct_t, tuple&lt;_Types1...&gt; _Val1, tuple&lt;_Types2...&gt; _Val2)
+        : pair(_Val1, _Val2, index_sequence_for&lt;_Types1...&gt;{}, index_sequence_for&lt;_Types2...&gt;{}) {}
+
+    pair&amp; operator=(const volatile pair&amp;) = delete;
+
+    template &lt;class _Myself = pair,
+        enable_if_t&lt;conjunction_v&lt;_Is_copy_assignable_no_precondition_check&lt;typename _Myself::first_type&gt;,
+                        _Is_copy_assignable_no_precondition_check&lt;typename _Myself::second_type&gt;&gt;,
+            int&gt;            = 0&gt;
+    _CONSTEXPR20 pair&amp; operator=(_Identity_t&lt;const _Myself&amp;&gt; _Right) noexcept(
+        conjunction_v&lt;is_nothrow_copy_assignable&lt;_Ty1&gt;, is_nothrow_copy_assignable&lt;_Ty2&gt;&gt;) /* strengthened */ {
+        first  = _Right.first;
+        second = _Right.second;
+        return *this;
+    }
+
+    template &lt;class _Myself = pair,
+        enable_if_t&lt;conjunction_v&lt;_Is_move_assignable_no_precondition_check&lt;typename _Myself::first_type&gt;,
+                        _Is_move_assignable_no_precondition_check&lt;typename _Myself::second_type&gt;&gt;,
+            int&gt;            = 0&gt;
+    _CONSTEXPR20 pair&amp; operator=(_Identity_t&lt;_Myself&amp;&amp;&gt; _Right) noexcept(
+        conjunction_v&lt;is_nothrow_move_assignable&lt;_Ty1&gt;, is_nothrow_move_assignable&lt;_Ty2&gt;&gt;) /* strengthened */ {
+        first  = _STD forward&lt;_Ty1&gt;(_Right.first);
+        second = _STD forward&lt;_Ty2&gt;(_Right.second);
+        return *this;
+    }
+
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;negation&lt;is_same&lt;pair, pair&lt;_Other1, _Other2&gt;&gt;&gt;, is_assignable&lt;_Ty1&amp;, const _Other1&amp;&gt;,
+                        is_assignable&lt;_Ty2&amp;, const _Other2&amp;&gt;&gt;,
+            int&gt; = 0&gt;
+    _CONSTEXPR20 pair&amp; operator=(const pair&lt;_Other1, _Other2&gt;&amp; _Right) noexcept(
+        is_nothrow_assignable_v&lt;_Ty1&amp;, const _Other1&amp;&gt;&amp;&amp;
+            is_nothrow_assignable_v&lt;_Ty2&amp;, const _Other2&amp;&gt;) /* strengthened */ {
+        first  = _Right.first;
+        second = _Right.second;
+        return *this;
+    }
+
+    template &lt;class _Other1, class _Other2,
+        enable_if_t&lt;conjunction_v&lt;negation&lt;is_same&lt;pair, pair&lt;_Other1, _Other2&gt;&gt;&gt;, is_assignable&lt;_Ty1&amp;, _Other1&gt;,
+                        is_assignable&lt;_Ty2&amp;, _Other2&gt;&gt;,
+            int&gt; = 0&gt;
+    _CONSTEXPR20 pair&amp; operator=(pair&lt;_Other1, _Other2&gt;&amp;&amp; _Right) noexcept(
+        is_nothrow_assignable_v&lt;_Ty1&amp;, _Other1&gt;&amp;&amp; is_nothrow_assignable_v&lt;_Ty2&amp;, _Other2&gt;) /* strengthened */ {
+        first  = _STD forward&lt;_Other1&gt;(_Right.first);
+        second = _STD forward&lt;_Other2&gt;(_Right.second);
+        return *this;
+    }
+
+    _CONSTEXPR20 void swap(pair&amp; _Right) noexcept(
+        _Is_nothrow_swappable&lt;_Ty1&gt;::value&amp;&amp; _Is_nothrow_swappable&lt;_Ty2&gt;::value) {
+        if (this != _STD addressof(_Right)) {
+            _Swap_adl(first, _Right.first);
+            _Swap_adl(second, _Right.second);
+        }
+    }
+
+    _Ty1 first; // the first stored value
+    _Ty2 second; // the second stored value
+};
+
+#if _HAS_CXX17
+template &lt;class _Ty1, class _Ty2&gt;
+pair(_Ty1, _Ty2) -&gt; pair&lt;_Ty1, _Ty2&gt;;
+#endif // _HAS_CXX17
+
+template &lt;class _Ty1, class _Ty2, enable_if_t&lt;_Is_swappable&lt;_Ty1&gt;::value &amp;&amp; _Is_swappable&lt;_Ty2&gt;::value, int&gt; = 0&gt;
+_CONSTEXPR20 void swap(pair&lt;_Ty1, _Ty2&gt;&amp; _Left, pair&lt;_Ty1, _Ty2&gt;&amp; _Right) noexcept(noexcept(_Left.swap(_Right))) {
+    _Left.swap(_Right);
+}
+
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool operator==(const pair&lt;_Ty1, _Ty2&gt;&amp; _Left, const pair&lt;_Ty1, _Ty2&gt;&amp; _Right) {
+    return _Left.first == _Right.first &amp;&amp; _Left.second == _Right.second;
+}
+
+#ifdef __cpp_lib_concepts
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr common_comparison_category_t&lt;_Synth_three_way_result&lt;_Ty1&gt;, _Synth_three_way_result&lt;_Ty2&gt;&gt;
+    operator&lt;=&gt;(const pair&lt;_Ty1, _Ty2&gt;&amp; _Left, const pair&lt;_Ty1, _Ty2&gt;&amp; _Right) {
+    if (auto _Result = _Synth_three_way{}(_Left.first, _Right.first); _Result != 0) {
+        return _Result;
+    }
+    return _Synth_three_way{}(_Left.second, _Right.second);
+}
+#else // ^^^ defined(__cpp_lib_concepts) / !defined(__cpp_lib_concepts) vvv
+#if !_HAS_CXX20
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool operator!=(const pair&lt;_Ty1, _Ty2&gt;&amp; _Left, const pair&lt;_Ty1, _Ty2&gt;&amp; _Right) {
+    return !(_Left == _Right);
+}
+#endif // !_HAS_CXX20
+
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool operator&lt;(const pair&lt;_Ty1, _Ty2&gt;&amp; _Left, const pair&lt;_Ty1, _Ty2&gt;&amp; _Right) {
+    return _Left.first &lt; _Right.first || (!(_Right.first &lt; _Left.first) &amp;&amp; _Left.second &lt; _Right.second);
+}
+
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool operator&gt;(const pair&lt;_Ty1, _Ty2&gt;&amp; _Left, const pair&lt;_Ty1, _Ty2&gt;&amp; _Right) {
+    return _Right &lt; _Left;
+}
+
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool operator&lt;=(const pair&lt;_Ty1, _Ty2&gt;&amp; _Left, const pair&lt;_Ty1, _Ty2&gt;&amp; _Right) {
+    return !(_Right &lt; _Left);
+}
+
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool operator&gt;=(const pair&lt;_Ty1, _Ty2&gt;&amp; _Left, const pair&lt;_Ty1, _Ty2&gt;&amp; _Right) {
+    return !(_Left &lt; _Right);
+}
+#endif // ^^^ !defined(__cpp_lib_concepts) ^^^
+
+// ALIAS TEMPLATE _Unrefwrap_t
+template &lt;class _Ty&gt;
+struct _Unrefwrap_helper { // leave unchanged if not a reference_wrapper
+    using type = _Ty;
+};
+
+template &lt;class _Ty&gt;
+struct _Unrefwrap_helper&lt;reference_wrapper&lt;_Ty&gt;&gt; { // make a reference from a reference_wrapper
+    using type = _Ty&amp;;
+};
+
+// decay, then unwrap a reference_wrapper
+template &lt;class _Ty&gt;
+using _Unrefwrap_t = typename _Unrefwrap_helper&lt;decay_t&lt;_Ty&gt;&gt;::type;
+
+// FUNCTION TEMPLATE make_pair
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr pair&lt;_Unrefwrap_t&lt;_Ty1&gt;, _Unrefwrap_t&lt;_Ty2&gt;&gt; make_pair(_Ty1&amp;&amp; _Val1, _Ty2&amp;&amp; _Val2) noexcept(
+    is_nothrow_constructible_v&lt;_Unrefwrap_t&lt;_Ty1&gt;, _Ty1&gt;&amp;&amp;
+        is_nothrow_constructible_v&lt;_Unrefwrap_t&lt;_Ty2&gt;, _Ty2&gt;) /* strengthened */ {
+    // return pair composed from arguments
+    using _Mypair = pair&lt;_Unrefwrap_t&lt;_Ty1&gt;, _Unrefwrap_t&lt;_Ty2&gt;&gt;;
+    return _Mypair(_STD forward&lt;_Ty1&gt;(_Val1), _STD forward&lt;_Ty2&gt;(_Val2));
+}
+
+namespace _CXX20_DEPRECATE_REL_OPS rel_ops {
+    template &lt;class _Ty&gt;
+    _CXX20_DEPRECATE_REL_OPS _NODISCARD bool operator!=(const _Ty&amp; _Left, const _Ty&amp; _Right) {
+        return !(_Left == _Right);
+    }
+
+    template &lt;class _Ty&gt;
+    _CXX20_DEPRECATE_REL_OPS _NODISCARD bool operator&gt;(const _Ty&amp; _Left, const _Ty&amp; _Right) {
+        return _Right &lt; _Left;
+    }
+
+    template &lt;class _Ty&gt;
+    _CXX20_DEPRECATE_REL_OPS _NODISCARD bool operator&lt;=(const _Ty&amp; _Left, const _Ty&amp; _Right) {
+        return !(_Right &lt; _Left);
+    }
+
+    template &lt;class _Ty&gt;
+    _CXX20_DEPRECATE_REL_OPS _NODISCARD bool operator&gt;=(const _Ty&amp; _Left, const _Ty&amp; _Right) {
+        return !(_Left &lt; _Right);
+    }
+} // namespace rel_ops
+
+// STRUCTS FOR STRUCTURED BINDINGS tuple_size AND tuple_element
+template &lt;class _Tuple&gt;
+struct tuple_size;
+
+template &lt;class _Tuple, class = void&gt;
+struct _Tuple_size_sfinae {}; // selected when tuple_size&lt;_Tuple&gt;::value isn't well-formed
+
+template &lt;class _Tuple&gt;
+struct _Tuple_size_sfinae&lt;_Tuple, void_t&lt;decltype(tuple_size&lt;_Tuple&gt;::value)&gt;&gt;
+    : integral_constant&lt;size_t, tuple_size&lt;_Tuple&gt;::value&gt; {}; // selected when tuple_size&lt;_Tuple&gt;::value is well-formed
+
+template &lt;class _Tuple&gt;
+struct tuple_size&lt;const _Tuple&gt; : _Tuple_size_sfinae&lt;_Tuple&gt; {}; // ignore cv
+
+template &lt;class _Tuple&gt;
+struct _CXX20_DEPRECATE_VOLATILE tuple_size&lt;volatile _Tuple&gt; : _Tuple_size_sfinae&lt;_Tuple&gt; {}; // ignore cv
+
+template &lt;class _Tuple&gt;
+struct _CXX20_DEPRECATE_VOLATILE tuple_size&lt;const volatile _Tuple&gt; : _Tuple_size_sfinae&lt;_Tuple&gt; {}; // ignore cv
+
+template &lt;class _Ty&gt;
+_INLINE_VAR constexpr size_t tuple_size_v = tuple_size&lt;_Ty&gt;::value;
+
+template &lt;size_t _Index, class _Tuple&gt;
+struct tuple_element;
+
+template &lt;size_t _Index, class _Tuple&gt;
+struct _MSVC_KNOWN_SEMANTICS tuple_element&lt;_Index, const _Tuple&gt; : tuple_element&lt;_Index, _Tuple&gt; {
+    using _Mybase = tuple_element&lt;_Index, _Tuple&gt;;
+    using type    = add_const_t&lt;typename _Mybase::type&gt;;
+};
+
+template &lt;size_t _Index, class _Tuple&gt;
+struct _CXX20_DEPRECATE_VOLATILE _MSVC_KNOWN_SEMANTICS tuple_element&lt;_Index, volatile _Tuple&gt;
+    : tuple_element&lt;_Index, _Tuple&gt; {
+    using _Mybase = tuple_element&lt;_Index, _Tuple&gt;;
+    using type    = add_volatile_t&lt;typename _Mybase::type&gt;;
+};
+
+template &lt;size_t _Index, class _Tuple&gt;
+struct _CXX20_DEPRECATE_VOLATILE _MSVC_KNOWN_SEMANTICS tuple_element&lt;_Index, const volatile _Tuple&gt;
+    : tuple_element&lt;_Index, _Tuple&gt; {
+    using _Mybase = tuple_element&lt;_Index, _Tuple&gt;;
+    using type    = add_cv_t&lt;typename _Mybase::type&gt;;
+};
+
+template &lt;size_t _Index, class _Tuple&gt;
+using tuple_element_t = typename tuple_element&lt;_Index, _Tuple&gt;::type;
+
+// TUPLE INTERFACE TO array
+template &lt;class _Ty, size_t _Size&gt;
+class array;
+
+template &lt;class _Ty, size_t _Size&gt;
+struct tuple_size&lt;array&lt;_Ty, _Size&gt;&gt; : integral_constant&lt;size_t, _Size&gt; {}; // size of array
+
+template &lt;size_t _Idx, class _Ty, size_t _Size&gt;
+struct _MSVC_KNOWN_SEMANTICS tuple_element&lt;_Idx, array&lt;_Ty, _Size&gt;&gt; {
+    static_assert(_Idx &lt; _Size, "array index out of bounds");
+
+    using type = _Ty;
+};
+
+// TUPLE INTERFACE TO tuple
+template &lt;class... _Types&gt;
+struct tuple_size&lt;tuple&lt;_Types...&gt;&gt; : integral_constant&lt;size_t, sizeof...(_Types)&gt; {}; // size of tuple
+
+template &lt;size_t _Index&gt;
+struct _MSVC_KNOWN_SEMANTICS tuple_element&lt;_Index, tuple&lt;&gt;&gt; { // enforce bounds checking
+    static_assert(_Always_false&lt;integral_constant&lt;size_t, _Index&gt;&gt;, "tuple index out of bounds");
+};
+
+template &lt;class _This, class... _Rest&gt;
+struct _MSVC_KNOWN_SEMANTICS tuple_element&lt;0, tuple&lt;_This, _Rest...&gt;&gt; { // select first element
+    using type = _This;
+    // MSVC assumes the meaning of _Ttype; remove or rename, but do not change semantics
+    using _Ttype = tuple&lt;_This, _Rest...&gt;;
+};
+
+template &lt;size_t _Index, class _This, class... _Rest&gt;
+struct _MSVC_KNOWN_SEMANTICS tuple_element&lt;_Index, tuple&lt;_This, _Rest...&gt;&gt;
+    : tuple_element&lt;_Index - 1, tuple&lt;_Rest...&gt;&gt; {}; // recursive tuple_element definition
+
+// TUPLE INTERFACE TO pair
+template &lt;class _Ty1, class _Ty2&gt;
+struct tuple_size&lt;pair&lt;_Ty1, _Ty2&gt;&gt; : integral_constant&lt;size_t, 2&gt; {}; // size of pair
+
+template &lt;size_t _Idx, class _Ty1, class _Ty2&gt;
+struct _MSVC_KNOWN_SEMANTICS tuple_element&lt;_Idx, pair&lt;_Ty1, _Ty2&gt;&gt; {
+    static_assert(_Idx &lt; 2, "pair index out of bounds");
+
+    using type = conditional_t&lt;_Idx == 0, _Ty1, _Ty2&gt;;
+};
+
+template &lt;class _Ret, class _Pair&gt;
+constexpr _Ret _Pair_get(_Pair&amp; _Pr, integral_constant&lt;size_t, 0&gt;) noexcept { // get reference to element 0 in pair _Pr
+    return _Pr.first;
+}
+
+template &lt;class _Ret, class _Pair&gt;
+constexpr _Ret _Pair_get(_Pair&amp; _Pr, integral_constant&lt;size_t, 1&gt;) noexcept { // get reference to element 1 in pair _Pr
+    return _Pr.second;
+}
+
+template &lt;size_t _Idx, class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr tuple_element_t&lt;_Idx, pair&lt;_Ty1, _Ty2&gt;&gt;&amp; get(
+    pair&lt;_Ty1, _Ty2&gt;&amp; _Pr) noexcept { // get reference to element at _Idx in pair _Pr
+    using _Rtype = tuple_element_t&lt;_Idx, pair&lt;_Ty1, _Ty2&gt;&gt;&amp;;
+    return _Pair_get&lt;_Rtype&gt;(_Pr, integral_constant&lt;size_t, _Idx&gt;{});
+}
+
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr _Ty1&amp; get(pair&lt;_Ty1, _Ty2&gt;&amp; _Pr) noexcept { // get reference to element _Ty1 in pair _Pr
+    return _STD get&lt;0&gt;(_Pr);
+}
+
+template &lt;class _Ty2, class _Ty1&gt;
+_NODISCARD constexpr _Ty2&amp; get(pair&lt;_Ty1, _Ty2&gt;&amp; _Pr) noexcept { // get reference to element _Ty2 in pair _Pr
+    return _STD get&lt;1&gt;(_Pr);
+}
+
+template &lt;size_t _Idx, class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr const tuple_element_t&lt;_Idx, pair&lt;_Ty1, _Ty2&gt;&gt;&amp; get(
+    const pair&lt;_Ty1, _Ty2&gt;&amp; _Pr) noexcept { // get const reference to element at _Idx in pair _Pr
+    using _Ctype = const tuple_element_t&lt;_Idx, pair&lt;_Ty1, _Ty2&gt;&gt;&amp;;
+    return _Pair_get&lt;_Ctype&gt;(_Pr, integral_constant&lt;size_t, _Idx&gt;{});
+}
+
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr const _Ty1&amp; get(
+    const pair&lt;_Ty1, _Ty2&gt;&amp; _Pr) noexcept { // get const reference to element _Ty1 in pair _Pr
+    return _STD get&lt;0&gt;(_Pr);
+}
+
+template &lt;class _Ty2, class _Ty1&gt;
+_NODISCARD constexpr const _Ty2&amp; get(
+    const pair&lt;_Ty1, _Ty2&gt;&amp; _Pr) noexcept { // get const reference to element _Ty2 in pair _Pr
+    return _STD get&lt;1&gt;(_Pr);
+}
+
+template &lt;size_t _Idx, class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr tuple_element_t&lt;_Idx, pair&lt;_Ty1, _Ty2&gt;&gt;&amp;&amp; get(
+    pair&lt;_Ty1, _Ty2&gt;&amp;&amp; _Pr) noexcept { // get rvalue reference to element at _Idx in pair _Pr
+    using _RRtype = tuple_element_t&lt;_Idx, pair&lt;_Ty1, _Ty2&gt;&gt;&amp;&amp;;
+    return _STD forward&lt;_RRtype&gt;(_STD get&lt;_Idx&gt;(_Pr));
+}
+
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr _Ty1&amp;&amp; get(pair&lt;_Ty1, _Ty2&gt;&amp;&amp; _Pr) noexcept { // get rvalue reference to element _Ty1 in pair _Pr
+    return _STD get&lt;0&gt;(_STD move(_Pr));
+}
+
+template &lt;class _Ty2, class _Ty1&gt;
+_NODISCARD constexpr _Ty2&amp;&amp; get(pair&lt;_Ty1, _Ty2&gt;&amp;&amp; _Pr) noexcept { // get rvalue reference to element _Ty2 in pair _Pr
+    return _STD get&lt;1&gt;(_STD move(_Pr));
+}
+
+template &lt;size_t _Idx, class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr const tuple_element_t&lt;_Idx, pair&lt;_Ty1, _Ty2&gt;&gt;&amp;&amp; get(
+    const pair&lt;_Ty1, _Ty2&gt;&amp;&amp; _Pr) noexcept { // get const rvalue reference to element at _Idx in pair _Pr
+    using _RRtype = const tuple_element_t&lt;_Idx, pair&lt;_Ty1, _Ty2&gt;&gt;&amp;&amp;;
+    return _STD forward&lt;_RRtype&gt;(_STD get&lt;_Idx&gt;(_Pr));
+}
+
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr const _Ty1&amp;&amp; get(
+    const pair&lt;_Ty1, _Ty2&gt;&amp;&amp; _Pr) noexcept { // get const rvalue reference to element _Ty1 in pair _Pr
+    return _STD get&lt;0&gt;(_STD move(_Pr));
+}
+
+template &lt;class _Ty2, class _Ty1&gt;
+_NODISCARD constexpr const _Ty2&amp;&amp; get(
+    const pair&lt;_Ty1, _Ty2&gt;&amp;&amp; _Pr) noexcept { // get const rvalue reference to element _Ty2 in pair _Pr
+    return _STD get&lt;1&gt;(_STD move(_Pr));
+}
+
+// FUNCTION TEMPLATE exchange
+template &lt;class _Ty, class _Other = _Ty&gt;
+_CONSTEXPR20 _Ty exchange(_Ty&amp; _Val, _Other&amp;&amp; _New_val) noexcept(
+<span style = "background-color:#dfd">    conjunction_v&lt;is_nothrow_move_constructible&lt;_Ty&gt;, is_nothrow_assignable&lt;_Ty&amp;, _Other&gt;&gt;) /* strengthened */ {</span>
+    // assign _New_val to _Val, return previous _Val
+<span style = "background-color:#dfd">    _Ty _Old_val = static_cast&lt;_Ty&amp;&amp;&gt;(_Val);
+    _Val         = static_cast&lt;_Other&amp;&amp;&gt;(_New_val);
+    return _Old_val;
+}</span>
+
+// FUNCTION TEMPLATE as_const
+template &lt;class _Ty&gt;
+_NODISCARD constexpr add_const_t&lt;_Ty&gt;&amp; as_const(_Ty&amp; _Val) noexcept { // view _Val through const lenses
+    return _Val;
+}
+
+template &lt;class _Ty&gt;
+void as_const(const _Ty&amp;&amp;) = delete;
+
+#if _HAS_CXX17
+// in_place TAG TYPE TEMPLATES
+struct in_place_t { // tag used to select a constructor which initializes a contained object in place
+    explicit in_place_t() = default;
+};
+inline constexpr in_place_t in_place{};
+
+template &lt;class&gt;
+struct in_place_type_t { // tag that selects a type to construct in place
+    explicit in_place_type_t() = default;
+};
+template &lt;class _Ty&gt;
+inline constexpr in_place_type_t&lt;_Ty&gt; in_place_type{};
+
+template &lt;size_t&gt;
+struct in_place_index_t { // tag that selects the index of a type to construct in place
+    explicit in_place_index_t() = default;
+};
+template &lt;size_t _Idx&gt;
+inline constexpr in_place_index_t&lt;_Idx&gt; in_place_index{};
+#endif // _HAS_CXX17
+
+#if _HAS_CXX20
+template &lt;class _Ty&gt;
+inline constexpr bool _Is_standard_integer = is_integral_v&lt;_Ty&gt;
+    &amp;&amp; !_Is_any_of_v&lt;remove_cv_t&lt;_Ty&gt;, bool, char,
+#ifdef _NATIVE_WCHAR_T_DEFINED
+        wchar_t,
+#endif // _NATIVE_WCHAR_T_DEFINED
+#ifdef __cpp_char8_t
+        char8_t,
+#endif // __cpp_char8_t
+        char16_t, char32_t&gt;;
+
+// FUNCTION TEMPLATE cmp_equal
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool cmp_equal(const _Ty1 _Left, const _Ty2 _Right) noexcept {
+    static_assert(_Is_standard_integer&lt;_Ty1&gt; &amp;&amp; _Is_standard_integer&lt;_Ty2&gt;,
+        "The integer comparison functions only accept standard and extended integer types.");
+    if constexpr (is_signed_v&lt;_Ty1&gt; == is_signed_v&lt;_Ty2&gt;) {
+        return _Left == _Right;
+    } else if constexpr (is_signed_v&lt;_Ty2&gt;) {
+        return _Left == static_cast&lt;make_unsigned_t&lt;_Ty2&gt;&gt;(_Right) &amp;&amp; _Right &gt;= 0;
+    } else {
+        return static_cast&lt;make_unsigned_t&lt;_Ty1&gt;&gt;(_Left) == _Right &amp;&amp; _Left &gt;= 0;
+    }
+}
+
+// FUNCTION TEMPLATE cmp_not_equal
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool cmp_not_equal(const _Ty1 _Left, const _Ty2 _Right) noexcept {
+    return !_STD cmp_equal(_Left, _Right);
+}
+
+// FUNCTION TEMPLATE cmp_less
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool cmp_less(const _Ty1 _Left, const _Ty2 _Right) noexcept {
+    static_assert(_Is_standard_integer&lt;_Ty1&gt; &amp;&amp; _Is_standard_integer&lt;_Ty2&gt;,
+        "The integer comparison functions only accept standard and extended integer types.");
+    if constexpr (is_signed_v&lt;_Ty1&gt; == is_signed_v&lt;_Ty2&gt;) {
+        return _Left &lt; _Right;
+    } else if constexpr (is_signed_v&lt;_Ty2&gt;) {
+        return _Right &gt; 0 &amp;&amp; _Left &lt; static_cast&lt;make_unsigned_t&lt;_Ty2&gt;&gt;(_Right);
+    } else {
+        return _Left &lt; 0 || static_cast&lt;make_unsigned_t&lt;_Ty1&gt;&gt;(_Left) &lt; _Right;
+    }
+}
+
+// FUNCTION TEMPLATE cmp_greater
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool cmp_greater(const _Ty1 _Left, const _Ty2 _Right) noexcept {
+    return _STD cmp_less(_Right, _Left);
+}
+
+// FUNCTION TEMPLATE cmp_less_equal
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool cmp_less_equal(const _Ty1 _Left, const _Ty2 _Right) noexcept {
+    return !_STD cmp_less(_Right, _Left);
+}
+
+// FUNCTION TEMPLATE cmp_greater_equal
+template &lt;class _Ty1, class _Ty2&gt;
+_NODISCARD constexpr bool cmp_greater_equal(const _Ty1 _Left, const _Ty2 _Right) noexcept {
+    return !_STD cmp_less(_Left, _Right);
+}
+
+// FUNCTION TEMPLATE in_range
+template &lt;class _Ty&gt;
+_NODISCARD _CONSTEVAL _Ty _Min_limit() noexcept { // same as (numeric_limits&lt;_Ty&gt;::min)(), less throughput cost
+    static_assert(_Is_standard_integer&lt;_Ty&gt;); // doesn't attempt to handle all types
+    if constexpr (is_signed_v&lt;_Ty&gt;) {
+        constexpr auto _Unsigned_max = static_cast&lt;make_unsigned_t&lt;_Ty&gt;&gt;(-1);
+        return static_cast&lt;_Ty&gt;((_Unsigned_max &gt;&gt; 1) + 1); // well-defined, N4861 [conv.integral]/3
+    } else {
+        return 0;
+    }
+}
+
+template &lt;class _Ty&gt;
+_NODISCARD _CONSTEVAL _Ty _Max_limit() noexcept { // same as (numeric_limits&lt;_Ty&gt;::max)(), less throughput cost
+    static_assert(_Is_standard_integer&lt;_Ty&gt;); // doesn't attempt to handle all types
+    if constexpr (is_signed_v&lt;_Ty&gt;) {
+        constexpr auto _Unsigned_max = static_cast&lt;make_unsigned_t&lt;_Ty&gt;&gt;(-1);
+        return static_cast&lt;_Ty&gt;(_Unsigned_max &gt;&gt; 1);
+    } else {
+        return static_cast&lt;_Ty&gt;(-1);
+    }
+}
+
+template &lt;class _Rx, class _Ty&gt;
+_NODISCARD constexpr bool in_range(const _Ty _Value) noexcept {
+    static_assert(_Is_standard_integer&lt;_Rx&gt; &amp;&amp; _Is_standard_integer&lt;_Ty&gt;,
+        "The integer comparison functions only accept standard and extended integer types.");
+
+    constexpr auto _Ty_min = _Min_limit&lt;_Ty&gt;();
+    constexpr auto _Rx_min = _Min_limit&lt;_Rx&gt;();
+
+    if constexpr (_STD cmp_less(_Ty_min, _Rx_min)) {
+        if (_Value &lt; _Ty{_Rx_min}) {
+            return false;
+        }
+    }
+
+    constexpr auto _Ty_max = _Max_limit&lt;_Ty&gt;();
+    constexpr auto _Rx_max = _Max_limit&lt;_Rx&gt;();
+
+    if constexpr (_STD cmp_greater(_Ty_max, _Rx_max)) {
+        if (_Value &gt; _Ty{_Rx_max}) {
+            return false;
+        }
+    }
+
+    return true;
+}
+#endif // _HAS_CXX20
+
+#if _HAS_TR1_NAMESPACE
+namespace _DEPRECATE_TR1_NAMESPACE tr1 {
+    using _STD get;
+    using _STD tuple_element;
+    using _STD tuple_size;
+} // namespace tr1
+#endif // _HAS_TR1_NAMESPACE
+
+_STD_END
+
+#pragma pop_macro("new")
+_STL_RESTORE_CLANG_WARNINGS
+#pragma warning(pop)
+#pragma pack(pop)
+#endif // _STL_COMPILER_PREPROCESSOR
+#endif // _UTILITY_</pre>
+        <hr />
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th align="center">
+                        <small>Generated by</small>
+                        <a href="https://github.com/OpenCppCoverage/OpenCppCoverage/releases">
+                            <strong>OpenCppCoverage (Version: 0.9.9.0)</strong>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </body>
+</html>
